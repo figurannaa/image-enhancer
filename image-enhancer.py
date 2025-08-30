@@ -1,17 +1,19 @@
 import argparse
 import os
-from PIL import Image
+from PIL import Image, ImageEnhance
 
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-w', '--width', type=int, default=0, help="Provide the desired width in px")
 parser.add_argument('-H', '--height', type=int, default=0, help="Provide the desired height in px")
+parser.add_argument('-e', '--enhance', action="store_true", help="Enhance image quality by modifying sharpness, contrast, and blur")
 parser.add_argument('-p', '--path', required=True, help="Provide the path to the image")
 
 args = parser.parse_args()
 
 width = args.width
 height = args.height
+enhance = args.enhance
 path = args.path
 
 #
@@ -68,8 +70,22 @@ def resize_image(image_path, width, height, output_path=None):
     with Image.open(image_path) as img:
         resized_img = img.resize((width, height), Image.LANCZOS)  
         save_path = output_path if output_path else image_path  
+        if enhance:
+            enhance_image(resized_img)
         resized_img.save(save_path)
         print(f"Image saved to {save_path} with size {width}x{height}")
+
+#
+# ENHANCE
+#
+def enhance_image(img):
+    enhancer = ImageEnhance.Sharpness(img)
+    s_enhanced_image = enhancer.enhance(4)
+
+    enhancer = ImageEnhance.Contrast(s_enhanced_image)
+    c_enhanced_image = enhancer.enhance(1.3)
+
+    return c_enhanced_image
 
 #
 # MAIN
